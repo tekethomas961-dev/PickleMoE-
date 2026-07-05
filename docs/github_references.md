@@ -1,61 +1,51 @@
-# GitHub 参考项目与借鉴点
+# GitHub 参考项目与设计借鉴
 
-本项目没有直接复制第三方代码，而是参考优秀开源项目的实验组织方式和模型设计取舍，并按本课程任务改写为轻量、可解释、可本地运行的版本。
+本项目的代码为课程任务独立实现，没有复制第三方仓库源码。参考 GitHub 项目的目的主要有三点：确定合理的表格学习基线、借鉴实验工程组织方式、吸收稀疏 MoE 的路由与负载分析思路。最终实现已按“匹克球四类击球分类”这一小规模、可解释、可本地运行的场景重新设计。
 
 ## 1. yandex-research/rtdl-revisiting-models
 
-链接：[Revisiting Deep Learning Models for Tabular Data](https://github.com/yandex-research/rtdl-revisiting-models)
+项目链接：[Revisiting Deep Learning Models for Tabular Data](https://github.com/yandex-research/rtdl-revisiting-models)
 
-借鉴点：
+该项目强调，在表格数据任务中，结构更复杂的模型需要与调优充分的 MLP 基线进行公平比较。因此本项目没有只展示 MoE，而是保留 Dense MLP 作为强基线，并让 MLP 与 MoE 共享同一套数据划分、标准化方式、训练策略和评价指标。
 
-- 把调优充分的 MLP 作为表格深度学习强基线。
-- 保持 Dense MLP 与复杂模型使用同一数据划分和训练策略。
-- 报告中不预设复杂模型必胜，而是用指标和误差分析说话。
+本项目中的对应实现：
 
-本项目对应实现：
-
-- `configs/mlp.yaml`
-- `src/pickleball_moe/models/mlp.py`
-- `run_mlp.py`
+- `configs/mlp.yaml`：MLP baseline 的默认实验配置。
+- `src/pickleball_moe/models/mlp.py`：Dense MLP 模型结构。
+- `run_mlp.py`：与 MoE 保持一致风格的训练入口。
 
 ## 2. manujosephv/pytorch_tabular
 
-链接：[PyTorch Tabular](https://github.com/manujosephv/pytorch_tabular)
+项目链接：[PyTorch Tabular](https://github.com/manujosephv/pytorch_tabular)
 
-借鉴点：
+该项目提供了较成熟的表格深度学习实验组织方式，包括配置化管理、统一训练入口、自动保存指标和产物等。本项目借鉴的是这种工程组织思路：用 YAML 管理模型和训练参数，用统一脚本运行不同实验，并将指标、预测结果、模型文件和图表统一保存到 `runs/` 目录。
 
-- 用配置文件组织实验参数，减少脚本里散落的超参数。
-- 自动保存训练产物，包括模型、配置、指标、预测结果和图表。
-- 让训练入口保持统一，便于切换模型和数据集。
+本项目中的对应实现：
 
-本项目对应实现：
-
-- `configs/*.yaml`
-- `src/pickleball_moe/train.py`
-- `scripts/summarize_runs.py`
-- `runs/<实验名>/metrics.json`
+- `configs/*.yaml`：集中管理 MLP、MoE-K=1、MoE-K=2 和负载平衡消融参数。
+- `src/pickleball_moe/train.py`：统一训练、验证、测试和保存逻辑。
+- `scripts/summarize_runs.py`：汇总多组实验结果。
+- `runs/<实验名>/metrics.json`：保存每组实验的核心指标和专家统计。
 
 ## 3. lucidrains/mixture-of-experts
 
-链接：[Sparsely Gated Mixture of Experts - Pytorch](https://github.com/lucidrains/mixture-of-experts)
+项目链接：[Sparsely Gated Mixture of Experts - Pytorch](https://github.com/lucidrains/mixture-of-experts)
 
-借鉴点：
+该项目体现了稀疏 MoE 的核心思想：门控网络根据输入选择少数专家参与计算，而不是让所有专家同时参与。本项目参考的是 top-k 稀疏路由、专家负载统计和辅助负载平衡损失的设计方向，并针对四类击球分类任务实现了一个更轻量的表格 MoE。
 
-- 使用稀疏门控专家层，通过只激活部分专家降低单样本计算。
-- 保留 top-k 路由权重、专家分配和负载统计，方便分析专家是否塌缩。
-- 将 MoE 的价值放在条件计算和专家分工，而不是简单比较总参数量。
+本项目中的对应实现：
 
-本项目对应实现：
+- `src/pickleball_moe/models/moe.py`：Expert、Gate、Top-K 路由和稀疏 logits 加权融合。
+- `switch_style_load_balance_loss`：用于缓解专家坍缩的负载平衡损失。
+- `class_to_expert_heatmap.png`：展示每类击球被路由到各专家的比例。
+- `expert_to_class_heatmap.png`：展示每个专家主要处理的击球类型。
 
-- `src/pickleball_moe/models/moe.py`
-- `switch_style_load_balance_loss`
-- `class_to_expert_heatmap.png`
-- `expert_to_class_heatmap.png`
+## 与课程任务的适配
 
-## 与本任务的适配
+上述参考项目多面向通用表格学习或较大规模 MoE，而本课程任务更关注“是否真正实现稀疏 MoE”以及“能否解释专家分工”。因此本项目做了如下适配：
 
-这些项目多面向通用表格学习或大规模 MoE。课程任务是小到中等规模的匹克球击球四分类，因此本项目做了三点收缩：
-
-1. 只保留 Dense MLP、MoE-K=1、MoE-K=2 三组核心实验。
-2. 只处理数值表格特征，默认使用中位数填补和标准化。
-3. MoE 专家数默认设为 4，重点输出专家负载、路由热图和混淆矩阵，服务于实验报告解释。
+1. 保留 Dense MLP、MoE-K=1、MoE-K=2 和负载平衡消融实验，避免只比较单一模型。
+2. 将输入限定为 8 个可解释的连续技术特征，便于说明不同击球类型的技术差异。
+3. 将专家数设为 4，与四类击球任务对应，方便分析专家是否出现专攻现象。
+4. 同时输出准确率、Macro F1、混淆矩阵、门控权重、专家负载和专家分工热图，使实验结论不只依赖单一准确率。
+5. 额外加入 Kaggle PKLMart 公开数据的非 PyTorch 测试，作为本地 MoE 实验之外的真实数据验证补充。
