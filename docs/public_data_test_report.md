@@ -1,4 +1,4 @@
-# 公开数据源非 PyTorch 测试报告
+# 公开数据源外部验证报告
 
 ## 数据源
 
@@ -9,24 +9,15 @@
 
 SCORE 页面说明该数据集来自 Tennis Match Charting Project，记录大满贯比赛 shot-level 信息。每行表示一次击球，字段包括 `ShotHand`、`ShotType`、`ShotDirection`、`ShotDepth`、`OutcomeType`、`ErrorType` 等。
 
-## 为什么不用本项目 PyTorch 流水线
+## 外部验证流程
 
-用户要求不要使用本项目本地 PyTorch 流水线，因此本次测试没有调用：
-
-```text
-run_mlp.py
-run_moe.py
-src/pickleball_moe/train.py
-src/pickleball_moe/models/*
-```
-
-本次使用独立脚本：
+本次公开数据验证使用独立脚本完成，与本地 MoE 训练实验分开呈现。对应脚本为：
 
 ```text
 scripts/public_score_tennis_test.py
 ```
 
-模型使用 scikit-learn：
+该脚本基于 scikit-learn Pipeline 构建传统机器学习基线，主要用于验证外部公开数据接入、特征处理、数据划分、指标计算和混淆矩阵生成流程。对比模型包括：
 
 - Logistic Regression
 - Random Forest
@@ -85,6 +76,6 @@ public_data_test/score_tennis/figures/rf_confusion_matrix.png
 
 1. SCORE 数据不是匹克球数据，而是网球数据。
 2. 当前公开测试使用的是 shot encoding 类别字段，不包含球速、挥拍速度、击球高度等连续物理特征。
-3. 本次不使用 PyTorch MoE，而是使用 scikit-learn 传统模型作为公开数据基准验证。
+3. 本次采用 scikit-learn 传统模型作为公开数据基准验证，重点观察外部数据上的分类难度和混淆模式。
 
-因此，这组结果的作用不是证明 MoE 在真实匹克球数据上已经达到高准确率，而是证明项目现在可以接入真实公开数据源，并能在非 PyTorch 流程下完成可复现实验、输出指标和混淆矩阵。
+因此，这组结果的作用不是证明 MoE 在真实匹克球数据上已经达到高准确率，而是证明项目现在可以接入真实公开数据源，并能完成可复现实验、输出指标和混淆矩阵。

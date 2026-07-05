@@ -133,8 +133,8 @@ window.MOE_PLATFORM_DATA = {
   publicTest: {
     sourceName: "Kaggle PKLMart Competitive Pickleball Extracts",
     sourceUrl: "https://www.kaggle.com/datasets/cakesofspan/pklmarts-competitive-pickleball-extracts/data",
-    dataUrl: "C:/Users/13342/Downloads/archive (1).zip",
-    method: "scikit-learn Pipeline, non-PyTorch",
+    dataUrl: "Kaggle downloaded archive.zip",
+    method: "scikit-learn Pipeline",
     datasetShape: [32000, 16],
     split: { train: 22280, val: 3104, test: 6616 },
     splitMethod: "GroupShuffleSplit(match_id)",

@@ -1,11 +1,11 @@
-# Kaggle PKLMart 真实匹克球数据非 PyTorch 测试报告
+# Kaggle PKLMart 真实匹克球数据测试报告
 
 ## 数据源
 
-用户已将 Kaggle 数据集下载到本机：
+本次使用从 Kaggle 下载的 PKLMart 数据压缩包，原始数据文件未纳入项目仓库：
 
 ```text
-C:\Users\13342\Downloads\archive (1).zip
+archive.zip
 ```
 
 压缩包 SHA256：
@@ -33,24 +33,17 @@ shot_id, rally_id, shot_nbr, shot_type, player_id,
 loc_x, loc_y, next_loc_x, next_loc_y
 ```
 
-## 本次测试没有使用 PyTorch
+## 外部验证流程
 
-本次按用户要求，没有调用本项目本地 PyTorch 流水线：
-
-```text
-run_mlp.py
-run_moe.py
-src/pickleball_moe/train.py
-src/pickleball_moe/models/*
-```
-
-使用的是独立脚本：
+本次公开数据验证使用独立测试脚本完成，与前面模拟数据上的 MoE 完整训练实验分开呈现。对应脚本为：
 
 ```text
 scripts/public_pklmart_test.py
 ```
 
-模型使用 scikit-learn：
+该脚本基于 scikit-learn Pipeline 构建外部基线模型，主要用于检验真实公开数据中的坐标、位移、角度和比赛元信息是否具有击球类型判别能力。
+
+本次对比模型包括：
 
 - Logistic Regression
 - Random Forest
@@ -127,6 +120,6 @@ public_data_test/pklmart_pickleball/figures/rf_confusion_matrix.png
 
 ## 结论
 
-这组结果来自真实 Kaggle 匹克球 shot-level 数据，比模拟数据更能体现实际验证意义。由于本次没有使用 MoE/PyTorch，而是使用 scikit-learn 传统模型，因此它的作用是给出真实公开数据上的外部基准结果。
+这组结果来自真实 Kaggle 匹克球 shot-level 数据，比模拟数据更能体现实际验证意义。作为外部基准实验，它使用 scikit-learn 传统模型评估真实公开数据中的可分性，为后续将真实数据接入 MoE 训练提供参考。
 
-在只使用坐标、位移、角度、球场位置和少量比赛元信息的情况下，Random Forest 达到约 0.74 的测试准确率和 0.739 的 Macro F1，说明真实坐标特征已经包含较强的击球类型判别信息。后续如果允许使用本项目 MoE 流水线，可以把同一份 PKLMart 数据映射进 MoE，再比较稀疏专家模型是否能进一步提升或形成专家分工。
+在只使用坐标、位移、角度、球场位置和少量比赛元信息的情况下，Random Forest 达到约 0.74 的测试准确率和 0.739 的 Macro F1，说明真实坐标特征已经包含较强的击球类型判别信息。后续可以把同一份 PKLMart 数据映射进 MoE，再比较稀疏专家模型是否能进一步提升或形成专家分工。
