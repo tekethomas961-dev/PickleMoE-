@@ -115,9 +115,9 @@ python scripts/prepare_real_dataset.py --input path/to/raw.csv --out data/real_p
 
 真实数据和公开数据集建议见 [docs/real_data_guide.md](docs/real_data_guide.md)。
 
-## 公开数据源非 PyTorch 测试
+## 公开数据源
 
-为满足“公开数据验证不依赖本项目 PyTorch 训练流水线”的要求，项目提供了两条独立的外部数据测试路径。两条路径均使用 scikit-learn Pipeline，不调用 `run_mlp.py`、`run_moe.py` 或 `src/pickleball_moe/models/*`，因此可以作为本地 MoE 实验之外的公开数据验证依据。
+项目提供了两条独立的外部数据测试路径。两条路径均使用 scikit-learn Pipeline，不调用 `run_mlp.py`、`run_moe.py` 或 `src/pickleball_moe/models/*`，因此可以作为本地 MoE 实验之外的公开数据验证依据。
 
 ### 1. SCORE 网球 shot-level 迁移验证
 
