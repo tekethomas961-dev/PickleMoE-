@@ -117,21 +117,29 @@ python scripts/prepare_real_dataset.py --input path/to/raw.csv --out data/real_p
 
 ## 公开数据源非 PyTorch 测试
 
-根据“不要用本项目本地 PyTorch 流水线”的要求，项目已新增一个独立公开数据测试脚本：
+为满足“公开数据验证不依赖本项目 PyTorch 训练流水线”的要求，项目提供了两条独立的外部数据测试路径。两条路径均使用 scikit-learn Pipeline，不调用 `run_mlp.py`、`run_moe.py` 或 `src/pickleball_moe/models/*`，因此可以作为本地 MoE 实验之外的公开数据验证依据。
+
+### 1. SCORE 网球 shot-level 迁移验证
+
+SCORE Grand Slam Tennis Shot-Level Data 是公开的球拍运动击球级数据。它不属于匹克球数据集，但适合用于验证本项目的数据处理、划分、分类评估和混淆矩阵生成流程能否在外部公开数据上独立运行。
 
 ```powershell
 python scripts/public_score_tennis_test.py --out-dir public_data_test/score_tennis --samples-per-class 2000
 ```
 
-该脚本直接下载 SCORE Grand Slam Tennis Shot-Level Data 的公开 `.csv.gz`，使用 scikit-learn 的 Logistic Regression 和 Random Forest 做测试，不调用 `run_mlp.py`、`run_moe.py` 或 `src/pickleball_moe/models/*`。
+该脚本会直接下载 SCORE 数据源提供的公开 `.csv.gz` 文件，并使用 Logistic Regression 与 Random Forest 完成测试。
 
 结果见 [docs/public_data_test_report.md](docs/public_data_test_report.md) 和 [public_data_test/score_tennis/summary.md](public_data_test/score_tennis/summary.md)。
 
-用户下载 Kaggle PKLMart 匹克球数据后，又新增了更贴题的真实匹克球非 PyTorch 测试：
+### 2. Kaggle PKLMart 真实匹克球验证
+
+PKLMart Competitive Pickleball Extracts 更贴近本课程主题，包含真实匹克球比赛中的 shot-level 记录。由于 Kaggle 数据通常需要登录后手动下载，运行时只需把下载得到的压缩包路径传给 `--zip`：
 
 ```powershell
-python scripts/public_pklmart_test.py --zip "C:\Users\13342\Downloads\archive (1).zip" --out-dir public_data_test/pklmart_pickleball --samples-per-class 8000
+python scripts/public_pklmart_test.py --zip "path/to/archive.zip" --out-dir public_data_test/pklmart_pickleball --samples-per-class 8000
 ```
+
+该脚本从 PKLMart 的真实击球记录中构造四类击球分类任务，并同样使用 Logistic Regression 与 Random Forest 作为非 PyTorch 基线。
 
 结果见 [docs/pklmart_public_test_report.md](docs/pklmart_public_test_report.md) 和 [public_data_test/pklmart_pickleball/summary.md](public_data_test/pklmart_pickleball/summary.md)。
 
