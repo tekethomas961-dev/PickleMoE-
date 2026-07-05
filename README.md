@@ -21,7 +21,7 @@
 
 ## 安装依赖
 
-当前机器的 Python 环境缺少 PyTorch、pandas、scikit-learn、matplotlib、PyYAML 和 joblib。建议在项目目录下新建虚拟环境后安装：
+项目已在 Windows + Python 3.12 虚拟环境下验证通过。首次克隆后，建议在项目目录下创建虚拟环境并安装依赖：
 
 ```powershell
 python -m venv .venv
@@ -31,10 +31,26 @@ python -m pip install -r requirements.txt
 python -m pip install -e .
 ```
 
-如果只想先检查项目脚本和 demo 数据生成，当前环境已有 NumPy，可以直接运行：
+已验证的关键依赖包括：
+
+| 依赖 | 作用 |
+|---|---|
+| `torch` | Dense MLP 与 Sparse MoE 训练 |
+| `pandas` / `numpy` | 表格数据读取与处理 |
+| `scikit-learn` | 数据划分、标准化、指标与公开数据测试 |
+| `matplotlib` | 训练曲线、混淆矩阵、专家热图 |
+| `PyYAML` / `joblib` | 配置读取与预处理器保存 |
+
+安装完成后，可以先检查项目脚本和 demo 数据生成：
 
 ```powershell
 python scripts/generate_demo_data.py --out data/demo_pickleball.csv --n-samples 600
+```
+
+也可以运行测试确认核心路由和 demo 数据逻辑：
+
+```powershell
+python -m pytest -q
 ```
 
 ## 运行内置 demo
@@ -134,13 +150,19 @@ python scripts/public_pklmart_test.py --zip "C:\Users\13342\Downloads\archive (1
 
 ## 平台展示
 
-最终呈现效果已经做成静态实验平台，入口是：
+最终呈现效果已经做成静态实验平台。推荐用项目内置 UTF-8 静态服务器启动，避免 Markdown 文档在浏览器中出现中文乱码：
 
-```text
-platform/index.html
+```powershell
+python scripts/serve_platform.py --host 127.0.0.1 --port 8765
 ```
 
-在 Windows 上可以直接双击打开，也可以用浏览器打开这个文件。平台中包含任务总览、模型结果表、K=1/K=2 专家分工热图、负载平衡消融、混淆矩阵、训练曲线和提交材料链接。
+然后打开：
+
+```text
+http://127.0.0.1:8765/platform/index.html
+```
+
+平台中包含任务总览、模型结果表、K=1/K=2 专家分工热图、负载平衡消融、混淆矩阵、训练曲线、Kaggle 公开数据验证和最终提交材料入口。
 
 ## GitHub 参考项目
 
