@@ -8,8 +8,25 @@ const docContent = document.querySelector("#docContent");
 
 docTitle.textContent = title;
 document.title = `${title} - 平台文档查看器`;
-rawLink.href = source;
-rawLink.download = source.split("/").pop() || "document.md";
+
+function uniqueUrls(urls) {
+  return [...new Set(urls.filter(Boolean))];
+}
+
+function resolveSourceCandidates(value) {
+  const trimmed = (value || "").trim();
+  const absolute = new URL(trimmed, window.location.href);
+  const rootRelative = trimmed.replace(/^(\.\.\/)+/, "").replace(/^\.\/+/, "");
+  const rootAbsolute = rootRelative.startsWith("/")
+    ? new URL(rootRelative, window.location.origin)
+    : new URL(`/${rootRelative}`, window.location.origin);
+  return uniqueUrls([absolute.href, rootAbsolute.href]);
+}
+
+const sourceCandidates = resolveSourceCandidates(source);
+const primarySourceUrl = sourceCandidates[0];
+rawLink.href = primarySourceUrl;
+rawLink.download = new URL(primarySourceUrl).pathname.split("/").pop() || "document.md";
 
 const escapeHtml = (value) =>
   value
@@ -165,19 +182,36 @@ function renderMarkdown(markdown) {
 }
 
 async function loadMarkdown() {
+  const errors = [];
   try {
-    const response = await fetch(source, { cache: "no-store" });
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    let markdown = "";
+    let loadedFrom = "";
+    for (const url of sourceCandidates) {
+      try {
+        const response = await fetch(url, { cache: "reload" });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const buffer = await response.arrayBuffer();
+        markdown = new TextDecoder("utf-8").decode(buffer);
+        loadedFrom = url;
+        break;
+      } catch (error) {
+        errors.push(`${url}: ${error.message}`);
+      }
     }
-    const buffer = await response.arrayBuffer();
-    const markdown = new TextDecoder("utf-8").decode(buffer);
+
+    if (!markdown) {
+      throw new Error(errors.join(" | "));
+    }
+    rawLink.href = loadedFrom;
     docContent.innerHTML = renderMarkdown(markdown);
   } catch (error) {
     docContent.innerHTML = `
       <div class="doc-error">
         <h2>文档读取失败</h2>
-        <p>无法打开 <code>${escapeHtml(source)}</code>，请确认本地预览服务器仍在运行。</p>
+        <p>无法打开 <code>${escapeHtml(source)}</code>。请确认本地预览服务器仍在运行，或按 <code>Ctrl + F5</code> 强制刷新页面。</p>
+        <p><a href="${escapeAttr(primarySourceUrl)}" target="_blank" rel="noreferrer">直接打开源文件</a></p>
         <small>${escapeHtml(error.message)}</small>
       </div>
     `;

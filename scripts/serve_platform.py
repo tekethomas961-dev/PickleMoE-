@@ -35,6 +35,10 @@ class Utf8StaticHandler(SimpleHTTPRequestHandler):
             return f"{content_type}; charset=utf-8"
         return content_type
 
+    def end_headers(self) -> None:
+        self.send_header("Cache-Control", "no-store, max-age=0")
+        super().end_headers()
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Serve the MoE platform with UTF-8 text headers.")
