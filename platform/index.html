@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>匹克球稀疏 MoE 实验平台</title>
+    <link rel="stylesheet" href="styles.css?v=utf8-doc-1" />
+  </head>
+  <body>
+    <aside class="sidebar" aria-label="平台导航">
+      <div class="brand">
+        <span class="brand-mark">MoE</span>
+        <div>
+          <strong>匹克球击球分类</strong>
+          <span>稀疏混合专家实验平台</span>
+        </div>
+      </div>
+      <nav>
+        <a href="#overview">总览</a>
+        <a href="#pipeline">稀疏机制</a>
+        <a href="#models">模型对比</a>
+        <a href="#routing">专家分工</a>
+        <a href="#balance">负载平衡</a>
+        <a href="#realdata">真实数据</a>
+        <a href="#figures">图表证据</a>
+        <a href="#artifacts">提交材料</a>
+      </nav>
+      <div class="sidebar-note">
+        <span>Final</span>
+        <strong>5 组完整实验</strong>
+        <p>MLP baseline、K=1/K=2 MoE 与负载平衡消融均已完成。</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section id="overview" class="hero-band">
+        <div class="hero-copy">
+          <div class="eyebrow">Final Dashboard</div>
+          <h1>匹克球四类击球分类的稀疏 MoE 实验平台</h1>
+          <p>
+            用 8 个技术特征完成四类击球识别，并通过 Top-K 路由、专家热图与负载平衡消融展示
+            稀疏 MoE 的机制差异和专家分工现象。
+          </p>
+          <div class="hero-actions">
+            <a href="doc.html?src=../docs/final_report_full_score.md&amp;title=满分版报告稿">查看报告稿</a>
+            <a href="doc.html?src=../runs/summary.md&amp;title=实验汇总表">查看结果表</a>
+          </div>
+        </div>
+        <div class="hero-dashboard" aria-label="关键实验指标">
+          <div class="hero-score">
+            <span>Best CV(load)</span>
+            <strong>0.163</strong>
+            <small>MoE-K=2, lb=0.01</small>
+          </div>
+          <div class="hero-score">
+            <span>Test Acc</span>
+            <strong>1.000</strong>
+            <small>五组模型均完成测试</small>
+          </div>
+          <div class="hero-score wide">
+            <span>Top-K 路由</span>
+            <div class="route-mini">
+              <i>Input</i>
+              <b>Gate</b>
+              <b>K=1/2</b>
+              <i>Experts</i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <div>
+            <p>Dataset</p>
+            <h2>模拟数据与类别设定</h2>
+          </div>
+        </div>
+        <div class="overview-grid">
+          <article class="surface">
+            <h3>8 个连续技术特征</h3>
+            <div class="feature-grid" id="featureGrid"></div>
+          </article>
+          <article class="surface insight-card">
+            <h3>4 类击球标签</h3>
+            <div class="label-chips">
+              <span>0 正手抽球</span>
+              <span>1 反手削球</span>
+              <span>2 网前吊球</span>
+              <span>3 高压球</span>
+            </div>
+            <p>数据按 7:1:2 划分，固定 seed=42，并仅用训练集拟合标准化器。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="pipeline" class="section">
+        <div class="section-heading">
+          <div>
+            <p>Sparse Mechanism</p>
+            <h2>稀疏 MoE 前向流程</h2>
+          </div>
+        </div>
+        <div class="pipeline" aria-label="MoE 前向流程图">
+          <div class="pipe-node input"><span>01</span><strong>输入特征 x</strong><small>8 维技术特征</small></div>
+          <div class="pipe-arrow"></div>
+          <div class="pipe-node gate"><span>02</span><strong>Gate 门控</strong><small>输出 4 个专家概率</small></div>
+          <div class="pipe-arrow"></div>
+          <div class="pipe-node topk"><span>03</span><strong>Top-K 选择</strong><small>K=1 或 K=2</small></div>
+          <div class="pipe-arrow"></div>
+          <div class="pipe-node experts"><span>04</span><strong>稀疏专家</strong><small>只运行被选专家</small></div>
+          <div class="pipe-arrow"></div>
+          <div class="pipe-node logits"><span>05</span><strong>加权 logits</strong><small>输出 4 类预测</small></div>
+        </div>
+      </section>
+
+      <section id="models" class="section">
+        <div class="section-heading">
+          <div>
+            <p>Experiment Table</p>
+            <h2>模型结果对比</h2>
+          </div>
+          <a class="ghost-link" href="doc.html?src=../runs/summary.md&amp;title=实验汇总表">打开 summary.md</a>
+        </div>
+        <div class="metrics-strip" id="topMetrics"></div>
+        <div class="table-wrap">
+          <table id="resultsTable">
+            <thead>
+              <tr>
+                <th>模型</th>
+                <th>Best Epoch</th>
+                <th>Test Acc</th>
+                <th>Macro F1</th>
+                <th>Balanced Acc</th>
+                <th>激活参数/样本</th>
+                <th>CV(load)</th>
+                <th>Max/Mean</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="routing" class="section">
+        <div class="section-heading">
+          <div>
+            <p>Top-K Routing</p>
+            <h2>K=1 与 K=2 专家分工</h2>
+          </div>
+          <div class="segmented" role="tablist" aria-label="专家分工视图">
+            <button class="segment active" data-routing="k1" type="button">K=1</button>
+            <button class="segment" data-routing="k2" type="button">K=2</button>
+          </div>
+        </div>
+        <div class="routing-grid">
+          <article class="image-panel">
+            <div class="panel-title">
+              <h3 id="routingTitle">K=1 selected gate 权重热图</h3>
+              <a id="routingImageLink" href="#" target="_blank" rel="noreferrer">打开图片</a>
+            </div>
+            <div class="image-frame">
+              <img id="routingImage" src="" alt="专家分工热图" />
+            </div>
+          </article>
+          <article class="data-panel">
+            <h3>每类击球的主导专家</h3>
+            <div id="dominantExperts" class="dominant-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="balance" class="section">
+        <div class="section-heading">
+          <div>
+            <p>Ablation</p>
+            <h2>负载平衡损失对比</h2>
+          </div>
+        </div>
+        <div class="balance-grid" id="balanceCards"></div>
+      </section>
+
+      <section id="realdata" class="section">
+        <div class="section-heading">
+          <div>
+            <p>Real Data</p>
+            <h2>真实数据验证入口</h2>
+          </div>
+          <a class="ghost-link" href="doc.html?src=../docs/real_data_guide.md&amp;title=真实数据导入指南">打开导入指南</a>
+        </div>
+        <div class="overview-grid">
+          <article class="surface">
+            <h3>当前平台结果来源</h3>
+            <p>
+              平台同时展示两类结果：核心 MoE 图表来自匹克球技术特征任务的完整训练实验；真实数据验证部分接入
+              Kaggle PKLMart 竞技匹克球数据集，并使用非 PyTorch 的 scikit-learn Pipeline 完成测试对比。
+            </p>
+          </article>
+          <article class="surface">
+            <h3>真实 CSV 接入方式</h3>
+            <p>
+              使用 <code>scripts/prepare_real_dataset.py</code> 将任意 CSV 映射为 8 个标准特征和
+              <code>label</code>，即可复用现有 MLP、MoE-K=1、MoE-K=2 训练命令。
+            </p>
+          </article>
+        </div>
+        <div class="public-source-card">
+          <div>
+            <p>Public Source Test</p>
+            <h3 id="publicSourceName">SCORE Grand Slam Tennis Shot-Level Data</h3>
+            <span id="publicMethod">scikit-learn Pipeline, non-PyTorch</span>
+          </div>
+          <a id="publicSourceLink" href="#" target="_blank" rel="noreferrer">打开公开数据源</a>
+        </div>
+        <div class="public-results-grid" id="publicResults"></div>
+        <div class="figure-grid public-figures" id="publicFigures"></div>
+      </section>
+
+      <section id="figures" class="section">
+        <div class="section-heading">
+          <div>
+            <p>Evidence Gallery</p>
+            <h2>图表证据</h2>
+          </div>
+        </div>
+        <div class="figure-tabs" id="figureTabs"></div>
+        <div class="figure-grid" id="figureGrid"></div>
+      </section>
+
+      <section id="artifacts" class="section">
+        <div class="section-heading">
+          <div>
+            <p>Submission</p>
+            <h2>最终提交材料</h2>
+          </div>
+        </div>
+        <div class="submission-panel">
+          <article class="submission-summary">
+            <span class="submission-tag">Ready</span>
+            <h3>课程提交包已整理</h3>
+            <p>
+              提交材料围绕“稀疏 MoE 四分类”组织：报告说明模型机制，代码保留可复现实验入口，
+              图表与公开数据验证用于支撑结果分析。
+            </p>
+            <div class="submission-stats" aria-label="提交材料概览">
+              <span><strong>4</strong><small>类击球</small></span>
+              <span><strong>5</strong><small>组实验</small></span>
+              <span><strong>2</strong><small>Top-K 设置</small></span>
+            </div>
+          </article>
+
+          <div class="submission-list" aria-label="最终提交材料列表">
+            <section class="submission-group">
+              <div class="submission-group-title">
+                <span>01</span>
+                <h3>报告与说明</h3>
+              </div>
+              <a class="submission-row" href="doc.html?src=../docs/final_report_full_score.md&amp;title=满分版报告稿">
+                <strong>满分版实验报告</strong>
+                <span>任务背景、MoE 结构、K=1/K=2 对比、专家分工与总结</span>
+                <b>查看</b>
+              </a>
+              <a class="submission-row" href="doc.html?src=../docs/github_references.md&amp;title=GitHub 参考说明">
+                <strong>开源项目参考说明</strong>
+                <span>说明借鉴的 GitHub 项目、借鉴点与本项目适配方式</span>
+                <b>查看</b>
+              </a>
+            </section>
+
+            <section class="submission-group">
+              <div class="submission-group-title">
+                <span>02</span>
+                <h3>代码与配置</h3>
+              </div>
+              <a class="submission-row" href="../src/pickleball_moe/models/moe.py">
+                <strong>稀疏 MoE 核心源码</strong>
+                <span>Expert、Gate、Top-K 路由、稀疏加权融合与负载平衡损失</span>
+                <b>打开</b>
+              </a>
+              <a class="submission-row" href="../configs/moe_k1.yaml">
+                <strong>K=1 实验配置</strong>
+                <span>每个样本只激活 1 个专家，突出稀疏性与专家分工</span>
+                <b>打开</b>
+              </a>
+              <a class="submission-row" href="../configs/moe_k2.yaml">
+                <strong>K=2 实验配置</strong>
+                <span>每个样本激活 2 个专家，加权融合提升稳定性</span>
+                <b>打开</b>
+              </a>
+            </section>
+
+            <section class="submission-group">
+              <div class="submission-group-title">
+                <span>03</span>
+                <h3>结果与验证</h3>
+              </div>
+              <a class="submission-row" href="doc.html?src=../runs/summary.md&amp;title=实验汇总表">
+                <strong>实验结果汇总表</strong>
+                <span>MLP、MoE-K=1、MoE-K=2 与负载平衡消融的指标对比</span>
+                <b>查看</b>
+              </a>
+              <a class="submission-row" href="doc.html?src=../docs/pklmart_public_test_report.md&amp;title=PKLMart 公开数据测试报告">
+                <strong>Kaggle 公开数据验证报告</strong>
+                <span>PKLMart 竞技匹克球数据集上的非 PyTorch Pipeline 测试结果</span>
+                <b>查看</b>
+              </a>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="data.js?v=utf8-doc-1"></script>
+    <script src="app.js?v=utf8-doc-1"></script>
+  </body>
+</html>

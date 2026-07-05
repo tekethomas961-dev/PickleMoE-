@@ -1,0 +1,48 @@
+experiment_name: dense_mlp
+data:
+  csv_path: data\demo_pickleball.csv
+  label_col: label
+  label_names:
+  - 正手抽球
+  - 反手削球
+  - 网前吊球
+  - 高压球
+  feature_cols:
+  - stance_x
+  - stance_y
+  - swing_speed
+  - ball_speed
+  - landing_x
+  - landing_y
+  - angle
+  - height
+  group_col: null
+  batch_size: 64
+  val_size: 0.1
+  test_size: 0.2
+  num_workers: 0
+model:
+  type: mlp
+  n_classes: 4
+  hidden_dims:
+  - 128
+  - 64
+  - 32
+  dropout:
+  - 0.2
+  - 0.2
+  - 0.1
+  batch_norm: true
+training:
+  seed: 42
+  max_epochs: 120
+  optimizer: adam
+  learning_rate: 0.001
+  weight_decay: 0.0
+  class_weight: balanced
+  grad_clip: 1.0
+  early_stopping_patience: 20
+  scheduler_factor: 0.5
+  scheduler_patience: 5
+  lambda_lb: 0.0
+  device: auto

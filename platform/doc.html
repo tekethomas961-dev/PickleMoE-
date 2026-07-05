@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>平台文档查看器</title>
+    <link rel="stylesheet" href="styles.css?v=utf8-doc-1" />
+  </head>
+  <body class="doc-page">
+    <main class="doc-shell">
+      <header class="doc-topbar">
+        <a class="doc-back" href="index.html">返回平台</a>
+        <div>
+          <p>Markdown Viewer</p>
+          <h1 id="docTitle">平台文档</h1>
+        </div>
+        <a id="rawLink" class="doc-raw" href="#" download>下载源文件</a>
+      </header>
+
+      <article id="docContent" class="doc-content" aria-live="polite">
+        <p class="doc-loading">正在读取文档...</p>
+      </article>
+    </main>
+
+    <script src="doc.js?v=utf8-doc-1"></script>
+  </body>
+</html>

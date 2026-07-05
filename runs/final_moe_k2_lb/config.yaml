@@ -1,0 +1,46 @@
+experiment_name: sparse_moe_k2
+data:
+  csv_path: data\demo_pickleball.csv
+  label_col: label
+  label_names:
+  - 正手抽球
+  - 反手削球
+  - 网前吊球
+  - 高压球
+  feature_cols:
+  - stance_x
+  - stance_y
+  - swing_speed
+  - ball_speed
+  - landing_x
+  - landing_y
+  - angle
+  - height
+  group_col: null
+  batch_size: 64
+  val_size: 0.1
+  test_size: 0.2
+  num_workers: 0
+model:
+  type: moe
+  n_classes: 4
+  num_experts: 4
+  k: 2
+  stem_dim: 64
+  expert_hidden_dim: 64
+  gate_hidden_dim: 32
+  dropout: 0.1
+  noisy_gating: false
+training:
+  seed: 42
+  max_epochs: 120
+  optimizer: adam
+  learning_rate: 0.001
+  weight_decay: 0.0
+  class_weight: balanced
+  grad_clip: 1.0
+  early_stopping_patience: 20
+  scheduler_factor: 0.5
+  scheduler_patience: 5
+  lambda_lb: 0.01
+  device: auto

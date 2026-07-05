@@ -1,0 +1,127 @@
+{
+  "experiment_name": "dense_mlp",
+  "model_type": "mlp",
+  "best_epoch": 63,
+  "device": "cpu",
+  "split_sizes": {
+    "train": 560,
+    "val": 80,
+    "test": 160
+  },
+  "feature_cols": [
+    "stance_x",
+    "stance_y",
+    "swing_speed",
+    "ball_speed",
+    "landing_x",
+    "landing_y",
+    "angle",
+    "height"
+  ],
+  "label_map": {
+    "正手抽球": 0,
+    "反手削球": 1,
+    "网前吊球": 2,
+    "高压球": 3
+  },
+  "total_parameters": 12004,
+  "active_parameters_per_sample": 12004,
+  "optimizer": "adam",
+  "lambda_lb": 0.0,
+  "top_k": null,
+  "test_loss": 0.0003726094146259129,
+  "accuracy": 1.0,
+  "macro_f1": 1.0,
+  "balanced_accuracy": 1.0,
+  "classification_report": {
+    "正手抽球": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 40.0
+    },
+    "反手削球": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 40.0
+    },
+    "网前吊球": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 40.0
+    },
+    "高压球": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 40.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 160.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 160.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      40,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      40,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      40,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      40
+    ]
+  ],
+  "confusion_matrix_normalized": [
+    [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ]
+}
